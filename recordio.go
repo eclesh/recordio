@@ -57,7 +57,7 @@ func (r *Reader) Next() ([]byte, error) {
 	}
 	if size > r.bufcap {
 		r.buf = make([]byte, size)
-		r.bufcap = uint64(size)
+		r.bufcap = size
 	}
 	_, err = io.ReadFull(r.r, r.buf[:size])
 	if err != nil {
