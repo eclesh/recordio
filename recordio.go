@@ -6,16 +6,19 @@
 // length of the data, and then the data itself as a binary blob.
 //
 // Example: reading
-// 	f, _ := os.Open("file.dat")
-// 	r := recordio.NewReader(f)
-// 	for {
-// 		data, err := r.Next()
-// 		if err == io.EOF {
-// 			break
-// 		}
+// 	f, err := os.Open("file.dat")
+//	if err != nil {
+//		log.Fatalln(err)
+//	}
+//	defer f.Close()
+// 	scanner := recordio.NewScanner(f)
+// 	for scanner.Scan() {
+// 		data := r.Bytes()
 // 		// Do something with data
 // 	}
-// 	f.Close()
+//	if err := scanner.Err(); err != nil {
+//		log.Fatalln(err)
+//	}
 //
 // Example: writing
 // 	f, _ := os.Create("file.data")
@@ -64,6 +67,54 @@ func (r *Reader) Next() ([]byte, error) {
 		return nil, err
 	}
 	return r.buf[:size], nil
+}
+
+// A Scanner is a convenient method for reading records sequentially.
+type Scanner struct {
+	r       io.Reader // the reader
+	err     error
+	buf     []byte
+	bufsize uint64
+	bufcap  uint64
+}
+
+// NewScanner creates a new Scanner from reader r.
+func NewScanner(r io.Reader) *Scanner {
+	return &Scanner{r: r}
+}
+
+// Scan chugs through the input record by record and stops at the first
+// error or EOF.
+func (s *Scanner) Scan() bool {
+	size, err := binary.ReadUvarint(s.r.(io.ByteReader))
+	if err != nil {
+		s.err = err
+		return false
+	}
+	s.bufsize = size
+	if size > s.bufcap {
+		s.buf = make([]byte, size)
+		s.bufcap = size
+	}
+	_, err = io.ReadFull(s.r, s.buf[:size])
+	if err != nil {
+		s.err = err
+		return false
+	}
+	return true
+}
+
+// Bytes returns the most recently scanned record.
+func (s *Scanner) Bytes() []byte {
+	return s.buf[:s.bufsize]
+}
+
+// Err returns the most recent error or nil if the error was EOF.
+func (s *Scanner) Err() error {
+	if s.err == io.EOF {
+		return nil
+	}
+	return s.err
 }
 
 type Writer struct {

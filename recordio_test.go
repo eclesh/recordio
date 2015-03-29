@@ -45,3 +45,38 @@ func TestOrder(t *testing.T) {
 		}
 	}
 }
+
+func TestScanner(t *testing.T) {
+	testValues := [][]byte{
+		[]byte("first"),
+		[]byte("second"),
+		[]byte("third"),
+	}
+
+	buf := new(bytes.Buffer)
+
+	w := NewWriter(buf)
+	for _, val := range testValues {
+		_, err := w.Write(val)
+		if err != nil {
+			t.Fatalf("unexpected error %v for value '%s'", err, val)
+		}
+	}
+
+	scanner := NewScanner(buf)
+	i := 0
+	for scanner.Scan() {
+		if i >= len(testValues) {
+			t.Fatalf("scanner scanned for %d elements but only %d exist", i, len(testValues))
+		}
+		expected := testValues[i]
+		data := scanner.Bytes()
+		if !bytes.Equal(data, expected) {
+			t.Fatalf("expected value '%s', got '%s' instead", string(expected), string(data))
+		}
+		i++
+	}
+	if err := scanner.Err(); err != nil {
+		t.Fatalf("unexpected error %v during scan", err)
+	}
+}
