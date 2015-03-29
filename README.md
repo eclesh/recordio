@@ -7,8 +7,21 @@ data structures to disk.
 Records are stored as an unsigned varint specifying the
 length of the data, and then the data itself as a binary blob.
 
-## Example: reading
+## Example: reading with a Scanner
+	f, _ := os.Open("file.data")
+	defer f.Close()
+	scanner := recordio.NewScanner(f)
+	for scanner.Scan() {
+		data := scanner.Bytes()
+		// Do something with data
+	}
+	if err := scanner.Err(); err != nil {
+		// Do error handling
+	}
+
+## Example: reading with a Reader
 	f, _ := os.Open("file.dat")
+	f.Close()
 	r := recordio.NewReader(f)
 	for {
 		data, err := r.Next()
@@ -17,7 +30,6 @@ length of the data, and then the data itself as a binary blob.
 		}
 		// Do something with data
 	}
-	f.Close()
 
 ## Example: writing
 	f, _ := os.Create("file.data")
