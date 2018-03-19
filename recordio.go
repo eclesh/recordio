@@ -4,29 +4,6 @@
 //
 // Records are stored as an unsigned varint specifying the
 // length of the data, and then the data itself as a binary blob.
-//
-// Example: reading
-// 	f, err := os.Open("file.dat")
-//	if err != nil {
-//		log.Fatalln(err)
-//	}
-//	defer f.Close()
-// 	scanner := recordio.NewScanner(f)
-// 	for scanner.Scan() {
-// 		data := r.Bytes()
-// 		// Do something with data
-// 	}
-//	if err := scanner.Err(); err != nil {
-//		log.Fatalln(err)
-//	}
-//
-// Example: writing
-// 	f, _ := os.Create("file.data")
-// 	w := recordio.NewWriter(f)
-// 	w.Write([]byte("this is a record"))
-// 	w.Write([]byte("this is a second record"))
-// 	f.Close()
-//
 package recordio
 
 import (
