@@ -84,7 +84,8 @@ func (s *Scanner) Scan() bool {
 	return true
 }
 
-// Bytes returns the most recently scanned record.
+// Bytes returns the most recently scanned record. Subsequent calls may
+// overwrite the returned data, so you must copy it if not using it immediately.
 func (s *Scanner) Bytes() []byte {
 	return s.buf[:s.bufsize]
 }
