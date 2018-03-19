@@ -80,6 +80,9 @@ type Scanner struct {
 
 // NewScanner creates a new Scanner from reader r.
 func NewScanner(r io.Reader) *Scanner {
+	if _, ok := r.(io.ByteReader); !ok {
+		r = bufio.NewReader(r)
+	}
 	return &Scanner{r: r}
 }
 
